@@ -68,4 +68,6 @@ mvn clean install
 
 ## ✒️ Authors
 
-* **Adrián Martínez** - `adrian-mm-fc`
+* **Adrián Martínez (Repository)** - `adrian-mm-fc`
+* **Luis Ernesto Hernández Rosas (Implementation)** - `adrian-mm-fc`
+
