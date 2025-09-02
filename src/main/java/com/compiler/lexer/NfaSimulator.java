@@ -2,8 +2,9 @@ package com.compiler.lexer;
 
 import java.util.Set;
 
-import com.compiler.lexer.nfa.NFA;
-import com.compiler.lexer.nfa.State;
+import com.compiler.lexer.regex.RegexParser;
+import com.compiler.lexer.nfa.*;
+import java.util.HashSet;
 
 /**
  * NfaSimulator
@@ -42,7 +43,6 @@ public class NfaSimulator {
      * @return True if the input is accepted by the NFA, false otherwise.
      */
     public boolean simulate(NFA nfa, String input) {
-        // TODO: Implement simulate
         /*
          Pseudocode:
          1. Initialize currentStates with epsilon-closure of NFA start state
@@ -55,7 +55,41 @@ public class NfaSimulator {
          3. After input, if any state in currentStates is final, return true
          4. Otherwise, return false
         */
-        throw new UnsupportedOperationException("Not implemented");
+        //Auxiliar set.
+        Set<State> current_states = new HashSet<State>();
+ 
+        //Adding in a set 'current states' a epsilon-closure of the initial state.
+        addEpsilonClosure(nfa.getStartState(),current_states);
+
+        //for each caracter in the input.
+        for (int i=0; i<input.length();i++){
+            char character = input.charAt(i); 
+            Set<State> nexStates = new HashSet<State>();
+
+            for (State estado : current_states){
+                for (Transition trans : estado.transitions){
+
+                    //if the transition matches with character.
+                    if ( trans.symbol!=null && trans.symbol.charValue()==character){
+                        State destino=trans.toState;
+                        
+                        //Getting epsilon-closure of the match character.
+                        addEpsilonClosure(destino,nexStates); 
+                    }
+                }
+            }
+            current_states=nexStates;
+        }
+
+        //if some state in the set 'curren_states' is a final state then return true, in any other case
+        //is false
+        for (State estado : current_states){
+            if (estado.isFinal) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -65,7 +99,6 @@ public class NfaSimulator {
      * @param closureSet The set to accumulate reachable states.
      */
     private void addEpsilonClosure(State start, Set<State> closureSet) {
-        // TODO: Implement addEpsilonClosure
         /*
          Pseudocode:
          If start not in closureSet:
@@ -74,6 +107,34 @@ public class NfaSimulator {
                  - If transition symbol is null:
                      - Recursively add epsilon-closure of destination state
         */
-        throw new UnsupportedOperationException("Not implemented");
+
+        //If start is already on closure Set then return.
+        if( closureSet.contains(start) ){
+            return;
+        }
+        
+        //Adding start to closureSet
+        closureSet.add(start);
+
+        // For each transition in star state transitions.
+        for ( Transition transition : start.transitions ) {
+            if( transition.symbol == null ){
+                //Here I found a epsilon transition. 
+                //Recursive call
+                addEpsilonClosure( transition.toState , closureSet);
+            }
+        }
     }
+
+    public static void main(String[] args) {
+        System.out.println("Creo el automata a|b");
+        
+        RegexParser parser = new RegexParser();
+        NFA automata=parser.parse("a|b");
+        NfaSimulator simulator = new NfaSimulator();
+        System.out.println("La cadena a del automata a|b ha sido: "+simulator.simulate(automata,"a"));
+
+    }
+
+
 }

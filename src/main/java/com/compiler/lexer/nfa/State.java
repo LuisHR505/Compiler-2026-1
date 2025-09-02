@@ -84,7 +84,8 @@ public class State {
         //lista auxiliar
         List<State> res = new LinkedList<>(); 
         for(Transition transicion: this.transitions){ //por cada transicion en las transiciones del estado.
-            if (transicion.symbol.charValue()==symbol){
+            
+            if (transicion.symbol!=null && transicion.symbol.charValue()==symbol){
                 res.add(transicion.toState);
             }
         }

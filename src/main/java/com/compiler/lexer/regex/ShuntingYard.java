@@ -26,9 +26,10 @@ public class ShuntingYard {
     }
 
     /**
-     * Busca un elemento dentro de un arreglo si esta regresa True, si no esta regresa False.
-     * @param arr arreglo de caracteres.
-     * @return true o false si el caracter esta dentro del arreglo o no.
+     * Look up for an element, if it is int the array returns true, in other case return false.
+     * @param arr character array.
+     * @param character character to find in the array.
+     * @return true if character is in it, false in other case.
      */
     public static boolean contains(char[] arr, char caracter){
         for(char car:arr){
@@ -48,45 +49,81 @@ public class ShuntingYard {
      * @return Regular expression with explicit concatenation operators.
      */
     public static String insertConcatenationOperator(String regex) {
-        // TODO: Implement insertConcatenationOperator
-        /*
-            Pseudocode:
-            For each character in regex:
-                - Append current character to output
-                - If not at end of string:
-                        - Check if current and next character form an implicit concatenation
-                        - If so, append '.' to output
-            Return output as string
-         */
-        String regex_new ="";
-        char[] operadores = {'*','|','+','.',')'}; //arreglo para guardar los caracteres que no necesitan una concatenacion
-        int apuntador=0; //apuntador para poder ver el siguiente elemento.
-        char[] regex_arr = regex.toCharArray(); // arreglo con chars de la cadena.
-        
-        for (char character :regex_arr ) {
-            if (apuntador<regex_arr.length-1) {
-                if (character=='('|| character=='.' || character== '|') { //operadores que no necesitan una concatenacion despues de escribirse
-                    regex_new=regex_new+character;
-                    
-                }else{
-                    regex_new=regex_new+character;
-                    if (!contains(operadores,regex_arr[apuntador+1])){
-                        regex_new=regex_new+'.';
-                    }
-                }    
-               apuntador+=1; // para evitar llegar al final del array y romper el algoritmo.
-            }else{
-                regex_new=regex_new+character; //para el ultimo caracter.
-            }
+        // /*
+        //     Pseudocode:
+        //     For each character in regex:
+        //         - Append current character to output
+        //         - If not at end of string:
+        //                 - Check if current and next character form an implicit concatenation
+        //                 - If so, append '.' to output
+        //     Return output as string
+        //  */
+
+        //string to return at the end.
+        StringBuilder str = new StringBuilder();
+
+        for (int i = 0; i < regex.length(); i++) {
             
+            //concat the current char to the str.
+            str=str.append(regex.charAt(i));
+            
+            //condition of loop exit.
+            if (i==regex.length()-1) {
+                break;
+            }else{
+                //auxiliar variables.
+                char current = regex.charAt(i);
+                char next = regex.charAt(i+1);
+
+                //cases of implicit concatetion.
+
+                //case 1.
+
+                if (isOperand(current) && isOperand(next)) {
+                    str.append('.');
+                
+                //case 2
+                }else if (isOperand(current) && next=='(') {
+                    str.append('.');
+                
+                //case 3
+                }else if(current==')' && isOperand(next)){
+                    str.append('.');
+
+                //case 4
+                }else if(isUnary(current) && isOperand(next)){
+                    str.append('.');
+                
+                //case 5
+                }else if (current==')'&&next=='(') {
+                    str.append('.');
+                }
+            }
         }
-        System.out.println("cadena con caracteres de concatenacion: "+regex_new);
+        return str.toString();
 
-        return regex_new;
-
-
-        //throw new UnsupportedOperationException("Not implemented");
     }
+
+    /**
+     * Auxiliar Function to know if a character is a operator unary or not.
+     * 
+     * @param c The character to compare with *?+
+     * @return true if c is unary, false in any other case.
+     */
+    public static boolean isUnary( char c ){
+        if ( isOperand(c) ){
+            return false;
+        }
+        switch (c) {
+            case '*':
+                return true;
+            case '?':
+                return true;
+            case '+':
+                return true;
+            default:
+                return false;
+    }   }
 
     /**
      * Determines if the given character is an operand (not an operator or
@@ -96,7 +133,6 @@ public class ShuntingYard {
      * @return true if it is an operand, false otherwise.
      */
     private static boolean isOperand(char c) {
-        // TODO: Implement isOperand
         /*
         Pseudocode:
         Return true if c is not one of: '|', '*', '?', '+', '(', ')', '·'
@@ -108,7 +144,6 @@ public class ShuntingYard {
         }else{
             return true;
         }
-        //throw new UnsupportedOperationException("Not implemented");
     }
 
     /**
@@ -120,7 +155,6 @@ public class ShuntingYard {
      * @return Regular expression in postfix notation.
      */
     public static String toPostfix(String infixRegex) {
-        // TODO: Implement toPostfix
         /*
         Pseudocode:
         1. Define operator precedence map
@@ -132,67 +166,70 @@ public class ShuntingYard {
             - If operator: pop operators with higher/equal precedence, then push current operator
         4. After loop, pop remaining operators to output
         5. Return output as string
-         */
-            Map<Character, Integer> operadores = new HashMap<>();
-            operadores.put('*', 4);
-            operadores.put('+', 3);
-            operadores.put('.', 2);
-            operadores.put('|', 1);
-            operadores.put('(', 0); // revisar si es necesario estos dos casos.
-            operadores.put(')', 0);
+        */
+        Map<Character, Integer> operators = new HashMap<>();
+        operators.put('?',5);
+        operators.put('*', 4);
+        operators.put('+', 3);
+        operators.put('.', 2);
+        operators.put('|', 1);
+        operators.put('(', 0);
+        operators.put(')', 0);
 
-            //obtener la concatenacion explicita.
-            String regex=insertConcatenationOperator(infixRegex);
+        //Auxiliar Variables
+        StringBuilder str = new StringBuilder();
+        Deque<Character> stack = new ArrayDeque<>();
+        
+        //explicit concatenation of infixRegex
+        String str_concat= insertConcatenationOperator(infixRegex);
 
-            //variables auxiliares
-            String salida="";
-            Deque<Character> pila = new ArrayDeque<>();
+        for (int i = 0; i < str_concat.length(); i++){
+            char current=str_concat.charAt(i);
 
+            
+            if(isOperand(current)){
+                //case1
+                str.append(current);
 
-            //por cada elemento en la regex
-            char [] regex_arr=regex.toCharArray();
-            for (char caracter : regex_arr) {
-                if (isOperand(caracter)){
-                    salida=salida+caracter;
-
-                }else if (caracter=='(') {
-                    pila.push(caracter);
+            }else if(current=='('){
+                //case 2
+                stack.push(current);
+            
+                
+            }else if(current==')'){
+                //case3
+                //pop until '(' appears.
+                while ((!stack.isEmpty()) && stack.peek()!='('){
+                    str.append(stack.pop());
                     
-                }else if(caracter==')'){
-                    while (pila.peek()!='(') {
-                        salida=salida+pila.pop();
-                    }
-                    pila.pop(); //para eliminar el '('
+                }
+                stack.pop(); // this is necesary to delete the '(' remaining character.
+                
+                
+            }else if(!isOperand(current)){
+                //case4
 
-                }else if(!isOperand(caracter)){
-                    //valor del caracter operador en el diccionario
-                    int valor=operadores.get(caracter);
-                    while (!pila.isEmpty() && operadores.get(pila.peek())>=valor){
-                        salida=salida+pila.pop();
-                    }
-                    pila.push(caracter); //agregamos el nuevo operador.
-                }   
-            }
-            //concatenamos todo lo que reste de la pila de operadores.
-            while (!pila.isEmpty()) {
-                salida=salida+pila.pop();
-            }
+                while ( (!stack.isEmpty()) && (operators.get(current)<=operators.get(stack.peek()))  ) {
+                    //while the stack is not empty aand the current operartor has a minor priority.
+                    str.append(stack.pop());
+                }
 
-            return salida;
+                //finally we add the operator to the stack
+                stack.push(current);
+            }  
+        }
 
-        //throw new UnsupportedOperationException("Not implemented");
+        //we need to pop all the elements remaining in the stack to the str.
+        while (!stack.isEmpty()){
+            str.append(stack.pop());            
+        }
+
+        return str.toString();
+
     }
 
     public static void main(String[] args) {
         System.out.println("Pruebas locales para los metodos de esta clase.");
-        //System.out.println("prueba para imprimir los caracteres");
-        // insertConcatenationOperator("abcd");
-        // insertConcatenationOperator("(abcd)");
-        // insertConcatenationOperator("(ab)cd");
-        // insertConcatenationOperator("(ab)*cd");
-        // insertConcatenationOperator("(a.b)*cd");
-        // insertConcatenationOperator("(a.b)*c+d|c");
-
         System.out.println("Prueba para la notacion posfija");
         System.out.println("resultado: "+toPostfix("(a|b)*(c)+"));
         System.out.println("resultado: "+toPostfix("(a|b)*(c)"));
@@ -200,6 +237,7 @@ public class ShuntingYard {
         System.out.println("resultado: "+toPostfix("(a)(a)"));
         System.out.println("resultado: "+toPostfix("((a|b|c)*d+)|e"));
         System.out.println("resultado: "+toPostfix("(a|b)*abb(a|b)*"));
+        System.out.println("resultado: "+toPostfix("((a|b)+)|(def)*"));
         
 
     }
