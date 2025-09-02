@@ -1,5 +1,7 @@
 package com.compiler.lexer.nfa;
 
+import java.util.List;
+
 /**
  * Represents a Non-deterministic Finite Automaton (NFA) with a start and end state.
  * <p>
@@ -17,23 +19,36 @@ public class NFA {
      * The final (accepting) state of the NFA.
      */
     public final State endState;
+    
+    // /*
+    //  * The set of states of the NFA.
+    //  */
+    // public List<State> setState;
 
     /**
      * Constructs a new NFA with the given start and end states.
      * @param start The initial state.
      * @param end The final (accepting) state.
      */
-    public NFA(State start, State end) {
-        // TODO: Implement constructor
-        throw new UnsupportedOperationException("Not implemented");
+    public NFA(State start, State end){
+        this.startState=start;
+        this.endState=end;
+        this.endState.isFinal=true;
     }
 
     /**
      * Returns the initial (start) state of the NFA.
      * @return the start state
      */
-    public State getStartState() {
-    // TODO: Implement getStartState
-    throw new UnsupportedOperationException("Not implemented");
+    public State getStartState(){
+        return this.startState;
+    }
+
+    /**
+     * Returns the initial (start) state of the NFA.
+     * @return the start state
+     */
+    public State getEndState(){
+        return this.endState;
     }
 }
